@@ -5,6 +5,8 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
+const { Web5 } = require("@web5/api");
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log("Server initialized on port ", PORT);
@@ -20,9 +22,50 @@ app.use(bodyParser.json());
 const JSONSchemas = (schemaName) => {
   const medicalConditionSchema = {
     name: "MedicalCondition",
+    jsonLDSchema: {
+      "@context": "https://schema.org/",
+      "@type": "MedicalCondition",
+      properties: [
+        "name",
+        "code",
+        "alternateName",
+        "associatedAnatomy",
+        "cause",
+        "differentialDiagnosis",
+        "signOrSymptom",
+        "possibleTreatment",
+        "riskFactor",
+        "primaryPrevention",
+        "typicalTest",
+      ],
+    },
     schema: {
       type: "object",
       properties: {
+        name: {
+          type: "string",
+          title: "Name",
+        },
+        code: {
+          type: "object",
+          properties: {
+            "@type": {
+              type: "string",
+              title: "",
+              default: "MedicalCode",
+              readOnly: true,
+            },
+            code: {
+              type: "string",
+              title: "Code",
+            },
+            codingSystem: {
+              type: "string",
+              title: "Coding System",
+            },
+          },
+          title: "Code",
+        },
         alternateName: {
           type: "string",
           title: "Alternate Name",
@@ -30,7 +73,7 @@ const JSONSchemas = (schemaName) => {
         associatedAnatomy: {
           type: "object",
           properties: {
-            type: {
+            "@type": {
               type: "string",
               enum: [
                 "AnatomicalStructure",
@@ -50,40 +93,67 @@ const JSONSchemas = (schemaName) => {
           type: "object",
           properties: {
             cause1: {
-              type: "string",
-              title: "Cause 1",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalCause",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Cause 1",
+                },
+              },
             },
             cause2: {
-              type: "string",
-              title: "Cause 2",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalCause",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Cause 2",
+                },
+              },
             },
             cause3: {
-              type: "string",
-              title: "Cause 3",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalCause",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Cause 3",
+                },
+              },
             },
           },
           title: "Causes",
         },
-        code: {
-          type: "object",
-          properties: {
-            code: {
-              type: "string",
-              title: "Code",
-            },
-            codingSystem: {
-              type: "string",
-              title: "Coding System",
-            },
-          },
-          title: "Code",
-        },
         differentialDiagnosis: {
           type: "object",
           properties: {
+            "@type": {
+              type: "string",
+              readOnly: true,
+              default: "DDxElement",
+            },
+
             diagnosis: {
               type: "object",
               properties: {
+                "@type": {
+                  readOnly: true,
+                  default: "MedicalCondition",
+                  type: "string",
+                },
                 name: {
                   type: "string",
                   title: "Diagnosis Name",
@@ -91,53 +161,129 @@ const JSONSchemas = (schemaName) => {
               },
               title: "Diagnosis",
             },
-            distinguishingSign: {
+          },
+          title: "Differential Diagnosis",
+        },
+        signOrSymptom: {
+          type: "object",
+          properties: {
+            sign1: {
               type: "object",
               properties: {
-                sign1: {
+                "@type": {
+                  default: "MedicalSymptom",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
                   type: "string",
                   title: "Sign 1",
                 },
-                sign2: {
+              },
+            },
+            sign2: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalSymptom",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
                   type: "string",
                   title: "Sign 2",
                 },
-                sign3: {
+              },
+            },
+            sign3: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalSymptom",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
                   type: "string",
                   title: "Sign 3",
                 },
-                sign4: {
+              },
+            },
+            sign4: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalSymptom",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
                   type: "string",
                   title: "Sign 4",
                 },
-                sign5: {
+              },
+            },
+            sign5: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalSymptom",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
                   type: "string",
                   title: "Sign 5",
                 },
               },
-              title: "Distinguishing Signs",
             },
           },
-          title: "Differential Diagnosis",
-        },
-        name: {
-          type: "string",
-          title: "Name",
+          title: "Signs Or Symptoms",
         },
         possibleTreatment: {
           type: "object",
           properties: {
             treatment1: {
-              type: "string",
-              title: "Treatment 1",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "Drug",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Treatment 1",
+                },
+              },
             },
             treatment2: {
-              type: "string",
-              title: "Treatment 2",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "Drug",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Treatment 2",
+                },
+              },
             },
             treatment3: {
-              type: "string",
-              title: "Treatment 3",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "Drug",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Treatment 3",
+                },
+              },
             },
           },
           title: "Possible Treatments",
@@ -146,16 +292,46 @@ const JSONSchemas = (schemaName) => {
           type: "object",
           properties: {
             factor1: {
-              type: "string",
-              title: "Factor 1",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalRiskFactor",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Factor 1",
+                },
+              },
             },
             factor2: {
-              type: "string",
-              title: "Factor 2",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalRiskFactor",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Factor 2",
+                },
+              },
             },
             factor3: {
-              type: "string",
-              title: "Factor 3",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalRiskFactor",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Factor 3",
+                },
+              },
             },
           },
           title: "Risk Factors",
@@ -164,64 +340,107 @@ const JSONSchemas = (schemaName) => {
           type: "object",
           properties: {
             prevention1: {
-              type: "string",
-              title: "Prevention 1",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "LifestyleModification",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Prevention 1",
+                },
+              },
             },
             prevention2: {
-              type: "string",
-              title: "Prevention 2",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "LifestyleModification",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Prevention 2",
+                },
+              },
             },
             prevention3: {
-              type: "string",
-              title: "Prevention 3",
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "LifestyleModification",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Prevention 3",
+                },
+              },
             },
           },
           title: "Primary Prevention",
         },
-        signOrSymptom: {
+        typicalTest: {
           type: "object",
           properties: {
-            symptom1: {
-              type: "string",
-              title: "Symptom 1",
+            test1: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalTest",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Test 1",
+                },
+              },
             },
-            symptom2: {
-              type: "string",
-              title: "Symptom 2",
+            test2: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalTest",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Test 2",
+                },
+              },
             },
-            symptom3: {
-              type: "string",
-              title: "Symptom 3",
-            },
-            symptom4: {
-              type: "string",
-              title: "Symptom 4",
-            },
-            symptom5: {
-              type: "string",
-              title: "Symptom 5",
+            test3: {
+              type: "object",
+              properties: {
+                "@type": {
+                  default: "MedicalTest",
+                  readOnly: true,
+                  type: "string",
+                },
+                name: {
+                  type: "string",
+                  title: "Test 3",
+                },
+              },
             },
           },
-          title: "Signs or Symptoms",
+          title: "Tests",
         },
       },
-      required: [
-        "alternateName",
-        "associatedAnatomy",
-        "code",
-        "name",
-        "possibleTreatment",
-        "riskFactor",
-        "primaryPrevention",
-        "signOrSymptom",
-      ],
+      required: [],
     },
     uiSchema: {
       alternateName: {
         "ui:widget": "text",
       },
       associatedAnatomy: {
-        type: {
+        "@type": {
           "ui:widget": "select",
         },
         name: {
@@ -324,6 +543,29 @@ const JSONSchemas = (schemaName) => {
           "ui:widget": "text",
         },
       },
+
+      possibleComplication: {
+        complication1: {
+          "ui:widget": "text",
+        },
+        complication2: {
+          "ui:widget": "text",
+        },
+        complication3: {
+          "ui:widget": "text",
+        },
+      },
+      typicalTest: {
+        test1: {
+          "ui:widget": "text",
+        },
+        test2: {
+          "ui:widget": "text",
+        },
+        test3: {
+          "ui:widget": "text",
+        },
+      },
     },
   };
 
@@ -331,97 +573,71 @@ const JSONSchemas = (schemaName) => {
 
   for (let schema of allSchemas) {
     if (schema.name == schemaName) {
-      return [schema.schema, schema.uiSchema];
+      return [schema.schema, schema.uiSchema, schema.jsonLDSchema];
     }
   }
 };
 
-//ig I should configure the protocol
-const addMedicalCondition = async (
-  name,
-  code,
-  associatedAnatomies,
-  description,
-  possibleComplication,
-  riskFactors,
-  signsOrSymptoms,
-  primaryPreventions,
-  possibleTreatments
-) => {
-  const medicalCondition = {
-    "@context": "https://schema.org",
-    "@type": "MedicalCondition",
-    name: name,
-    code: code,
-    associatedAnatomy: associatedAnatomies,
-    description: description,
-    possibleComplication: possibleComplication,
-    possibleTreatment: possibleTreatments,
-    // [
-    //   {
-    //     "@type": "Drug",
-    //     name: "aspirin",
-    //   },
-    //   {
-    //     "@type": "DrugClass",
-    //     name: "beta blockers",
-    //   },
-    //   {
-    //     "@type": "DrugClass",
-    //     name: "ACE inhibitors",
-    //   },
-    //   {
-    //     "@type": "Drug",
-    //     name: "nitroglycerine",
-    //   },
-    // ],
-    riskFactor: riskFactors,
-    // [
-    //   {
-    //     "@type": "MedicalRiskFactor",
-    //     name: "Age",
-    //   },
-    //   {
-    //     "@type": "MedicalRiskFactor",
-    //     name: "Total cholesterol and/or cholesterol:HDL ratio",
-    //   },
-    //   {
-    //     "@type": "MedicalRiskFactor",
-    //     name: "Coronary artery disease",
-    //   },
-    // ],
-    primaryPrevention: primaryPreventions,
-    // [
-    //   {
-    //     "@type": "LifestyleModification",
-    //     name: "stopping smoking",
-    //   },
-    //   {
-    //     "@type": "LifestyleModification",
-    //     name: "weight management",
-    //   },
-    //   {
-    //     "@type": "LifestyleModification",
-    //     name: "increased physical activity",
-    //   },
-    // ]
-    signOrSymptom: signsOrSymptoms,
-    //  [
-    //   {
-    //     "@type": "MedicalSymptom",
-    //     name: "chest discomfort",
-    //   },
-    //   {
-    //     "@type": "MedicalSymptom",
-    //     name: "feeling of tightness, heaviness, or pain in the chest",
-    //   },
-    // ],
-    typicalTest: {
-      "@type": "MedicalTest",
-      name: testName,
-      usedToDiagnose: name,
-    },
+const formatSchema = async (args, schemaName) => {
+  if (!JSONSchemas(schemaName)) {
+    return false;
+  }
+
+  const schema = JSONSchemas(schemaName)[2];
+
+  const schemaWithInfo = {
+    "@context": schema["@context"],
+    "@type": schema["@type"],
   };
+
+  for (let index in schema.properties) {
+    let property = schema.properties[index];
+
+    //if its a list of objects
+    if (
+      Object.values(args[property]).filter((a) => typeof a == "object")
+        .length == Object.values(args[property]).length
+    ) {
+      schemaWithInfo[property] = [];
+      for (let index in args[property]) {
+        let item = args[property][index];
+        if (item.name) {
+          schemaWithInfo[property].push(item);
+        }
+      }
+    } else {
+      schemaWithInfo[property] = args[property];
+    }
+  }
+
+  return schemaWithInfo;
+};
+
+const getWeb5 = async (myDid) => {
+  const { web5 } = await Web5.connect({
+    connectedDid: myDid,
+  });
+
+  return web5;
+};
+
+//ig I should configure the protocol
+const addRecordToDwn = async (schema, myDid) => {
+  let web5 = await getWeb5(myDid);
+
+  const response = await web5.dwn.records.create({
+    data: schema,
+    message: {
+      schema: schema["@context"] + schema["@type"],
+      dataFormat: "application/json",
+    },
+  });
+
+  if (response.status.code === 202) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 app.post("/request-schema", (req, res) => {
@@ -434,4 +650,14 @@ app.post("/request-ui-schema", (req, res) => {
   const { schemaName } = req.body;
   const schema = JSONSchemas(schemaName)[1];
   res.send(JSON.stringify(schema));
+});
+
+//------------------pushed-------------------------
+
+app.post("/add-schema-to-dwn", async (req, res) => {
+  const { myDid, formData, schemaName } = req.body;
+  const schemaWithInfo = await formatSchema(formData, schemaName);
+  const result = addRecordToDwn(schemaWithInfo, myDid);
+  res.json({ result: result });
+  // const web5 = await getWeb5(myDid);
 });
