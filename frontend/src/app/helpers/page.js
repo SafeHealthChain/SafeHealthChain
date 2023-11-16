@@ -22,6 +22,7 @@ export async function fetchBackend(endpoint, method = "GET", body = {}) {
       },
     });
   } else {
+    console.log("JSON.stringify(body): ", JSON.stringify(body));
     result = await fetch(url, {
       method: "POST",
       body: JSON.stringify(body),

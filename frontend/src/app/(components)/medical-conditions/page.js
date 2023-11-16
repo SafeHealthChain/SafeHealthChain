@@ -20,8 +20,6 @@ export default function medicalConditions() {
         setMyDID(await getMyDID());
       }
       //read medical conditions inputs and display when creating a schema
-      let div = document.getElementById("medical-conditions-form");
-      console.log("div: ", div);
       let schema = await fetchBackend("/request-schema", "POST", {
         schemaName: "MedicalCondition",
       });
@@ -36,6 +34,16 @@ export default function medicalConditions() {
     initialize();
   }, []);
 
+  const onSubmit = async ({ formData }, e) => {
+    let result = await fetchBackend("/add-schema-to-dwn", "POST", {
+      myDID: myDID,
+      formData: formData,
+      schemaName: "MedicalCondition",
+    });
+
+    console.log("result: ", result);
+  };
+
   return (
     <>
       <h1>Medical Conditions</h1>
@@ -49,6 +57,7 @@ export default function medicalConditions() {
                 uiSchema={UISchema}
                 liveValidate={true}
                 validator={validator}
+                onSubmit={onSubmit}
               ></ThemedForm>
             </>
           ) : (
