@@ -1,12 +1,21 @@
-import { getMyDID, getPatientDID, updatePatientDID } from "@/app/helpers/page";
+"use client";
+import {
+  getMyDID,
+  getPatientDID,
+  updatePatientDID,
+  switchPortalSide,
+  getPortalSide,
+} from "@/app/helpers/page";
 import { useEffect, useState } from "react";
 
 export default function Header() {
   const [patientDID, setPatientDID] = useState(null);
+  const [portalSide, setPortalSide] = useState(null);
 
   useEffect(() => {
-    if (!patientDID) {
+    if (!patientDID && !portalSide) {
       setPatientDID(getPatientDID());
+      setPortalSide(getPortalSide());
     }
   }, []);
 
@@ -21,11 +30,21 @@ export default function Header() {
     setPatientDID(getPatientDID());
   };
 
+  const switchPortal = () => {
+    switchPortalSide();
+    setPortalSide(getPortalSide());
+  };
+
   return (
     <>
       <div>
         <p>Current patient DID: {patientDID}</p>
 
+        <p>Portal: {portalSide}</p>
+        <button onClick={switchPortal}>Switch Portal</button>
+
+        <br></br>
+        <br></br>
         <label>New patient DID</label>
         <input placeholder="Input new patient DID" id="NewPatientDID"></input>
         <button onClick={changePatient}>Change</button>

@@ -112,8 +112,6 @@ export async function addToDwn(schema) {
 
   sendRecord(record);
 
-  readFromDwn();
-
   if (status.code == 202) {
     return true;
   } else {
@@ -125,16 +123,33 @@ export async function sendRecord(record) {
   return await record.send(getPatientDID());
 }
 
-export async function readFromDwn() {
+export async function readFromDwn(protocolPath) {
   const { web5, did } = await Web5.connect();
 
   const { records } = await web5.dwn.records.query({
     message: {
       filter: {
         protocol: protocolDefinition.protocol,
+        protocolPath: protocolPath,
       },
     },
   });
 
   console.log("records: ", await records[0].data.json());
+}
+
+export function getPortalSide() {
+  const portalSide = localStorage.getItem("portalSide");
+
+  if (!portalSide || portalSide == undefined || portalSide == "") {
+    return "patient";
+  } else {
+    return portalSide;
+  }
+}
+
+export function switchPortalSide() {
+  const portalSide = getPortalSide();
+  const newPortalSide = portalSide == "doctor" ? "patient" : "doctor";
+  localStorage.setItem("portalSide", newPortalSide);
 }
