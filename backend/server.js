@@ -19,6 +19,38 @@ app.use(
 );
 app.use(bodyParser.json());
 
+const protocolDefinition = {
+  protocol: "http://localhost:5000/protocol",
+  published: true,
+  types: {
+    medicalCondition: {
+      schema: "https://schema.org/MedicalCondition",
+      dataFormats: ["text/plain"],
+    },
+  },
+  structure: {
+    medicalCondition: {
+      $actions: [
+        {
+          who: "recipient",
+          of: "medicalCondition",
+          can: "read",
+        },
+        {
+          who: "author",
+          of: "medicalCondition",
+          can: "read",
+        },
+        {
+          who: "author",
+          of: "medicalCondition",
+          can: "write",
+        },
+      ],
+    },
+  },
+};
+
 const JSONSchemas = (schemaName) => {
   const medicalConditionSchema = {
     name: "MedicalCondition",
@@ -578,7 +610,7 @@ const JSONSchemas = (schemaName) => {
   }
 };
 
-const formatSchema = async (args, schemaName) => {
+const formatSchema = (args, schemaName) => {
   if (!JSONSchemas(schemaName)) {
     return false;
   }
@@ -593,17 +625,24 @@ const formatSchema = async (args, schemaName) => {
   for (let index in schema.properties) {
     let property = schema.properties[index];
 
+    if (!args[property]) {
+      continue;
+    }
+
     //if its a list of objects
     if (
       Object.values(args[property]).filter((a) => typeof a == "object")
         .length == Object.values(args[property]).length
     ) {
-      schemaWithInfo[property] = [];
+      list = [];
       for (let index in args[property]) {
         let item = args[property][index];
         if (item.name) {
-          schemaWithInfo[property].push(item);
+          list.push(item);
         }
+      }
+      if (list.length > 0) {
+        schemaWithInfo[property] = list;
       }
     } else {
       schemaWithInfo[property] = args[property];
@@ -611,33 +650,6 @@ const formatSchema = async (args, schemaName) => {
   }
 
   return schemaWithInfo;
-};
-
-const getWeb5 = async (myDid) => {
-  const { web5 } = await Web5.connect({
-    connectedDid: myDid,
-  });
-
-  return web5;
-};
-
-//ig I should configure the protocol
-const addRecordToDwn = async (schema, myDid) => {
-  let web5 = await getWeb5(myDid);
-
-  const response = await web5.dwn.records.create({
-    data: schema,
-    message: {
-      schema: schema["@context"] + schema["@type"],
-      dataFormat: "application/json",
-    },
-  });
-
-  if (response.status.code === 202) {
-    return true;
-  } else {
-    return false;
-  }
 };
 
 app.post("/request-schema", (req, res) => {
@@ -654,10 +666,33 @@ app.post("/request-ui-schema", (req, res) => {
 
 //------------------pushed-------------------------
 
-app.post("/add-schema-to-dwn", async (req, res) => {
-  const { myDid, formData, schemaName } = req.body;
-  const schemaWithInfo = await formatSchema(formData, schemaName);
-  const result = addRecordToDwn(schemaWithInfo, myDid);
-  res.json({ result: result });
-  // const web5 = await getWeb5(myDid);
+app.post("/format-as-schema", (req, res) => {
+  const { formData, schemaName } = req.body;
+  const schemaWithInfo = formatSchema(formData, schemaName);
+  console.log("schemaWithInfo: ", schemaWithInfo);
+  res.send(JSON.stringify(schemaWithInfo));
+});
+
+app.get("/protocol", (req, res) => {
+  const protocolDefinition = {
+    protocol: "http://localhost:3001/protocol",
+    published: true,
+    types: {
+      medicalcondition: {
+        schema: "https://schema.org/MedicalCondition",
+        dataFormats: ["application/json"],
+      },
+    },
+    structure: {
+      medicalcondition: {
+        $actions: [
+          { who: "anyone", can: "write" },
+          { who: "author", of: "medicalcondition", can: "read" },
+          { who: "recipient", of: "medicalcondition", can: "read" },
+        ],
+      },
+    },
+  };
+
+  res.send(JSON.stringify(protocolDefinition));
 });
