@@ -5,12 +5,15 @@ import {
   updatePatientDID,
   switchPortalSide,
   getPortalSide,
-} from "@/app/helpers/page";
+} from "@/app/(components)/helpers/page";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [patientDID, setPatientDID] = useState(null);
   const [portalSide, setPortalSide] = useState(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (!patientDID && !portalSide) {
@@ -33,6 +36,7 @@ export default function Header() {
   const switchPortal = () => {
     switchPortalSide();
     setPortalSide(getPortalSide());
+    router.refresh();
   };
 
   return (
@@ -43,12 +47,22 @@ export default function Header() {
         <p>Portal: {portalSide}</p>
         <button onClick={switchPortal}>Switch Portal</button>
 
-        <br></br>
-        <br></br>
-        <label>New patient DID</label>
-        <input placeholder="Input new patient DID" id="NewPatientDID"></input>
-        <button onClick={changePatient}>Change</button>
-        <button onClick={copyDID}>Copy ID</button>
+        {portalSide == "doctor" ? (
+          <>
+            <br></br>
+            <br></br>
+            <label>New patient DID</label>
+            <input
+              placeholder="Input new patient DID"
+              id="NewPatientDID"
+            ></input>
+            <button onClick={changePatient}>Change</button>
+
+            <button onClick={copyDID}>Copy ID</button>
+          </>
+        ) : (
+          <></>
+        )}
       </div>
     </>
   );

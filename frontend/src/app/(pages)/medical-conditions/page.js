@@ -5,7 +5,10 @@ import {
   fetchBackend,
   addToDwn,
   getPatientDID,
-} from "@/app/helpers/page";
+  getPortalSide,
+  readFromDwn,
+  formatRecords,
+} from "@/app/(components)/helpers/page";
 
 import { withTheme } from "@rjsf/core";
 import Bootstrap4Theme from "@rjsf/bootstrap-4";
@@ -37,10 +40,14 @@ export default function medicalConditions() {
       //read medical conditions and display from client side
     };
 
-    const read = async () => {};
+    if (getPortalSide() == "patient") {
+      const interval = setInterval(async () => {
+        const records = await readFromDwn(schemaName);
+        formatRecords(records);
+      }, 60000);
+    }
 
     initialize();
-    read();
   }, []);
 
   const onSubmit = async ({ formData }, e) => {
@@ -57,7 +64,7 @@ export default function medicalConditions() {
       <h1>Medical Conditions</h1>
       <div id="medical-conditions-form">
         <div className="uniforms">
-          {schema ? (
+          {getPortalSide() == "doctor" && schema ? (
             <>
               <ThemedForm
                 schema={schema}

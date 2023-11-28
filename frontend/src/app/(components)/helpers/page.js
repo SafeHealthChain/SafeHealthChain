@@ -130,12 +130,20 @@ export async function readFromDwn(protocolPath) {
     message: {
       filter: {
         protocol: protocolDefinition.protocol,
-        protocolPath: protocolPath,
+        protocolPath: protocolPath.toLowerCase(),
       },
     },
   });
 
-  console.log("records: ", await records[0].data.json());
+  const recordsDecoded = [];
+
+  for (let record of records) {
+    const data = await record.data.json();
+    recordsDecoded.push(data);
+  }
+
+  console.log("recordsDecoded: ", recordsDecoded);
+  return recordsDecoded;
 }
 
 export function getPortalSide() {
@@ -153,3 +161,5 @@ export function switchPortalSide() {
   const newPortalSide = portalSide == "doctor" ? "patient" : "doctor";
   localStorage.setItem("portalSide", newPortalSide);
 }
+
+export function formatRecords(records) {}
